@@ -1,5 +1,4 @@
-﻿using ChessEngine.Entities.Board;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ChessEngine
@@ -35,6 +34,20 @@ namespace ChessEngine
             _chessBoard.WhitePawnTexture = Content.Load<Texture2D>("Pieces/WhitePawn");
             _chessBoard.BlackPawnTexture = Content.Load<Texture2D>("Pieces/BlackPawn");
 
+            _chessBoard.WhiteRookTexture = Content.Load<Texture2D>("Pieces/WhiteRook");
+            _chessBoard.BlackRookTexture = Content.Load<Texture2D>("Pieces/BlackRook");
+
+            _chessBoard.WhiteKnightTexture = Content.Load<Texture2D>("Pieces/WhiteKnight");
+            _chessBoard.BlackKnightTexture = Content.Load<Texture2D>("Pieces/BlackKnight");
+
+            _chessBoard.WhiteBishopTexture = Content.Load<Texture2D>("Pieces/WhiteBishop");
+            _chessBoard.BlackBishopTexture = Content.Load<Texture2D>("Pieces/BlackBishop");
+
+            _chessBoard.WhiteKingTexture = Content.Load<Texture2D>("Pieces/WhiteKing");
+            _chessBoard.BlackKingTexture = Content.Load<Texture2D>("Pieces/BlackKing");
+
+            _chessBoard.WhiteQueenTexture = Content.Load<Texture2D>("Pieces/WhiteQueen");
+            _chessBoard.BlackQueenTexture = Content.Load<Texture2D>("Pieces/BlackQueen");
 
             _chessBoard.PopulateBoard();
         }

@@ -1,18 +1,18 @@
-﻿using ChessEngine.Entities.Board;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.Drawing;
-
-namespace ChessEngine.Entities.Pieces
+namespace ChessEngine.Pieces
 {
-    internal class Pawn : IPiece
+    internal class King : IPiece
     {
+        public bool IsHeld { get; set; }
+        public Vector2 WindowPosition { get; set; }
         public PlayerTypes PlayerType { get; set; }
         public Texture2D Texture { get; set; }
         public int CurrentPosition { get; set; }
         public Rectangle Collider { get; set; }
 
-        public Pawn(PlayerTypes playerType, Texture2D texture)
+        public King(PlayerTypes playerType, Texture2D texture)
         {
             PlayerType = playerType;
             this.Texture = texture;
@@ -25,7 +25,7 @@ namespace ChessEngine.Entities.Pieces
             bool isFirstMove = false;
             if (PlayerType == PlayerTypes.Black && CurrentPosition > 7 && CurrentPosition < 16)
                 isFirstMove = true;
-            else if (PlayerType == PlayerTypes.White && CurrentPosition > 46 &&  CurrentPosition < 56)
+            else if (PlayerType == PlayerTypes.White && CurrentPosition > 46 && CurrentPosition < 56)
                 isFirstMove = true;
 
             var moves = new List<Move>();
@@ -40,7 +40,7 @@ namespace ChessEngine.Entities.Pieces
             newEndPosition = CurrentPosition + step;
 
             if (newEndPosition > 0 && newEndPosition < 64)
-             {
+            {
                 if (boardRepresentation[newEndPosition] == null)
                 {
                     moves.Add(new Move(CurrentPosition, newEndPosition));

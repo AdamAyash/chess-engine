@@ -1,4 +1,4 @@
-﻿namespace ChessEngine.Entities.Pieces
+﻿namespace ChessEngine
 {
     internal struct Move
     {

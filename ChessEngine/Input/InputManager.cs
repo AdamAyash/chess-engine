@@ -13,6 +13,11 @@ namespace ChessEngine.Input
             return _previousMouseState.LeftButton == ButtonState.Released && _nextMouseState.LeftButton == ButtonState.Pressed;
         }
 
+        public static bool IsLeftButtonHeld()
+        {
+            return _previousMouseState.LeftButton == ButtonState.Pressed && _nextMouseState.LeftButton == ButtonState.Pressed;
+        }
+
         public static bool IsRightButtonPressed()
         {
             return _previousMouseState.RightButton == ButtonState.Released && _nextMouseState.RightButton == ButtonState.Pressed;

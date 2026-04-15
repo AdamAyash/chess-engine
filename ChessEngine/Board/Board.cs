@@ -1,11 +1,11 @@
-﻿using ChessEngine.Entities.Pieces;
-using ChessEngine.Input;
+﻿using ChessEngine.Input;
+using ChessEngine.Pieces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ChessEngine.Entities.Board
+namespace ChessEngine
 {
     public enum PlayerTypes
     {
@@ -36,6 +36,16 @@ namespace ChessEngine.Entities.Board
 
         public Texture2D WhitePawnTexture { get; set; }
         public Texture2D BlackPawnTexture { get; set; }
+        public Texture2D WhiteRookTexture { get; set; }
+        public Texture2D BlackRookTexture { get; set; }
+        public Texture2D WhiteKnightTexture { get; set; }
+        public Texture2D BlackKnightTexture { get; set; }
+        public Texture2D WhiteBishopTexture { get; set; }
+        public Texture2D BlackBishopTexture { get; set; }
+        public Texture2D WhiteKingTexture { get; set; }
+        public Texture2D BlackKingTexture { get; set; }
+        public Texture2D WhiteQueenTexture { get; set; }
+        public Texture2D BlackQueenTexture { get; set; }
 
         public Board()
         {
@@ -78,7 +88,6 @@ namespace ChessEngine.Entities.Board
                 Unselect();
 
             int currentSquareIndex = 0;
-
             if (InputManager.IsLeftButtonPressed())
             {
                 for (int columns = 0; columns < _boardSize; columns++)
@@ -113,23 +122,72 @@ namespace ChessEngine.Entities.Board
                 }
             }
 
+            //currentSquareIndex = 0;
+            //if (InputManager.IsLeftButtonHeld())
+            //{
+            //    if (_selectedPiece is not null)
+            //    {
+            //        _selectedPiece.IsHeld = true;
+            //        _selectedPiece.WindowPosition = new Vector2(InputManager.MousePosition.X, InputManager.MousePosition.Y);
+            //    }
+            //}
+            //else
+            //{
+            //    if (_selectedPiece is not null)
+            //    {
+            //        _selectedPiece.IsHeld = false;
+            //        _selectedPiece.WindowPosition = Vector2.Zero;
+            //    }
+            //}
+
             InputManager.UpdatePreviousState();
         }
 
         public void PopulateBoard()
         {
             int boardSquareIndex = 0;
-            const string FENStarting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+            //const string FENStarting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+            const string FENStarting = "r/6/r/8/8/8/8/8/8/R/6/R";
 
             var characters = FENStarting.ToCharArray();
             foreach (var symbol in characters)
             {
                 IPiece piece = null;
 
-                if (symbol.Equals('P'))
-                    piece = new Pawn(PlayerTypes.White, WhitePawnTexture);
-                else if (symbol.Equals('p'))
-                    piece = new Pawn(PlayerTypes.Black, BlackPawnTexture);
+                bool isPiece = char.IsLetter(symbol);
+                if (isPiece)
+                {
+                    if (symbol.Equals('P'))
+                        piece = new Pawn(PlayerTypes.White, WhitePawnTexture);
+                    else if (symbol.Equals('p'))
+                        piece = new Pawn(PlayerTypes.Black, BlackPawnTexture);
+
+                    if (symbol.Equals('R'))
+                        piece = new Rook(PlayerTypes.White, WhiteRookTexture);
+                    else if (symbol.Equals('r'))
+                        piece = new Rook(PlayerTypes.Black, BlackRookTexture);
+
+                    if (symbol.Equals('B'))
+                        piece = new Bishop(PlayerTypes.White, WhiteBishopTexture);
+                    else if (symbol.Equals('b'))
+                        piece = new Bishop(PlayerTypes.Black, BlackBishopTexture);
+
+                    if (symbol.Equals('N'))
+                        piece = new Bishop(PlayerTypes.White, WhiteKnightTexture);
+                    else if (symbol.Equals('n'))
+                        piece = new Bishop(PlayerTypes.Black, BlackKnightTexture);
+
+                    if (symbol.Equals('Q'))
+                        piece = new Queen(PlayerTypes.White, WhiteQueenTexture);
+                    else if (symbol.Equals('q'))
+                        piece = new Queen(PlayerTypes.Black, BlackQueenTexture);
+
+                    if (symbol.Equals('K'))
+                        piece = new King(PlayerTypes.White, WhiteKingTexture);
+                    else if (symbol.Equals('k'))
+                        piece = new King(PlayerTypes.Black, BlackKingTexture);
+
+                }
                 else if (char.IsDigit(symbol))
                 {
                     int emptySpaceOffset = int.Parse(symbol.ToString());
@@ -190,7 +248,18 @@ namespace ChessEngine.Entities.Board
                     spriteBatch.Draw(currentSquareTexture, squareRectangle, color);
 
                     if (piece != null)
-                        spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
+                    {
+                        if (piece == _selectedPiece && _selectedPiece.IsHeld)
+                        {
+                            squareRectangle = new Rectangle((int)_selectedPiece.WindowPosition.X, (int)_selectedPiece.WindowPosition.Y, squareRectangle.Width, squareRectangle.Height);
+                            spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
+                        }
+                        else
+                        {
+                            spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
+
+                        }
+                    }
 
                     counter++;
                 }

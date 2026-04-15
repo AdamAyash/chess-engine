@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChessEngine.Entities.Pieces
+namespace ChessEngine.Pieces
 {
     internal enum PieceTypes
     {
