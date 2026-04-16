@@ -31,8 +31,8 @@ namespace ChessEngine
             _chessBoard.LightSquareTexture = Content.Load<Texture2D>("Board/LightSquareTexture");
             _chessBoard.DarkSquareTexture = Content.Load<Texture2D>("Board/DarkSquareTexture");
 
-            _chessBoard.WhitePawnTexture = Content.Load<Texture2D>("Pieces/WhitePawn");
-            _chessBoard.BlackPawnTexture = Content.Load<Texture2D>("Pieces/BlackPawn");
+            //_chessBoard.WhitePawnTexture = Content.Load<Texture2D>("Pieces/WhitePawn");
+            //_chessBoard.BlackPawnTexture = Content.Load<Texture2D>("Pieces/BlackPawn");
 
             _chessBoard.WhiteRookTexture = Content.Load<Texture2D>("Pieces/WhiteRook");
             _chessBoard.BlackRookTexture = Content.Load<Texture2D>("Pieces/BlackRook");

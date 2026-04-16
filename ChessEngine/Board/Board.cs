@@ -7,12 +7,6 @@ using System.Linq;
 
 namespace ChessEngine
 {
-    public enum PlayerTypes
-    {
-        Black = 0,
-        White = 1,
-    }
-
     internal class Board
     {
         private const int _boardSize = 8;

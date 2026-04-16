@@ -24,23 +24,10 @@ namespace ChessEngine.Pieces
         public List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
         {
             var moves = new List<Move>();
-            int newEndPosition = -1;
 
-            for(int index = 1; index <= 8; index++)
+            for(int direction = 0; direction < 8; direction++)
             {
-                newEndPosition = CurrentPosition + index;
-                if (newEndPosition % 8 == 0)
-                    break;
 
-                if (boardRepresentation[newEndPosition] == null)
-                    moves.Add(new Move(CurrentPosition, newEndPosition));
-
-                newEndPosition = CurrentPosition - index;
-                if (newEndPosition % 8 == 0)
-                    break;
-
-                if (boardRepresentation[newEndPosition] == null)
-                    moves.Add(new Move(CurrentPosition, newEndPosition));
             }
 
             return moves;
