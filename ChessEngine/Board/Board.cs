@@ -1,4 +1,5 @@
-﻿using ChessEngine.Input;
+﻿using ChessEngine.Common;
+using ChessEngine.Input;
 using ChessEngine.Pieces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

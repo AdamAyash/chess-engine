@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ChessEngine.Common;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 namespace ChessEngine.Pieces

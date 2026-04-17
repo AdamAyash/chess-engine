@@ -1,4 +1,4 @@
-namespace ChessEngine
+namespace ChessEngine.Common
 {
     public enum PlayerTypes
     {
