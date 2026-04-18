@@ -1,63 +1,63 @@
 ﻿using ChessEngine.Common;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace ChessEngine.Pieces
 {
-    internal class Knight
+    internal class Knight : BasePiece
     {
-        public bool IsHeld { get; set; }
-        public Vector2 WindowPosition { get; set; }
-        public PlayerTypes PlayerType { get; set; }
-        public Texture2D Texture { get; set; }
-        public int CurrentPosition { get; set; }
-        public Rectangle Collider { get; set; }
-
         public Knight(PlayerTypes playerType, Texture2D texture)
+            : base(playerType, texture)
         {
-            PlayerType = playerType;
-            this.Texture = texture;
+        }
+        public override int[] Directions()
+        {
+            return new int[] { };
         }
 
-        public PieceTypes GetPieceType() => PieceTypes.Pawn;
+        public override PieceTypes GetPieceType() => PieceTypes.Knight;
 
-        public List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
+        public override List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
         {
-            bool isFirstMove = false;
-            if (PlayerType == PlayerTypes.Black && CurrentPosition > 7 && CurrentPosition < 16)
-                isFirstMove = true;
-            else if (PlayerType == PlayerTypes.White && CurrentPosition > 46 && CurrentPosition < 56)
-                isFirstMove = true;
+           var moves = new List<Move>();
 
-            var moves = new List<Move>();
-
-            int step = PlayerType == PlayerTypes.White ? (8 * (-1)) : 8;
-
-            int enPassantStep1 = PlayerType == PlayerTypes.White ? (7 * (-1)) : 7;
-            int enPassantStep2 = PlayerType == PlayerTypes.White ? (9 * (-1)) : 9;
-
-            int newEndPosition = -1;
-
-            newEndPosition = CurrentPosition + step;
-
-            if (newEndPosition > 0 && newEndPosition < 64)
+            int[][] pos =
             {
-                if (boardRepresentation[newEndPosition] == null)
+                new int[]{- 16 , 1 },
+                new int[]{- 16 , -1 },
+                new int[]{-8 , 2},
+                new int[] {-8, -2},
+                new int []{8, -2},
+                new int []{8, 2},
+                new int []{16, 1},
+                new int []{16, -1}
+            };
+
+            int row = CurrentPosition / 8;
+            int col = CurrentPosition  % 8;
+
+            for(int index = 0; index < pos.Length; index++)
+            {
+                int newRow = row + (pos[index][0] / 8);
+                int newCol = col + pos[index][1];
+
+                if (newCol < 0 || newCol > 7)
+                    continue;
+
+                if (newRow < 0 || newRow > 7)
+                    continue;
+
+                int newPosition = CurrentPosition + pos[index][0] + pos[index][1];
+                Move move = new Move(CurrentPosition, newPosition);
+
+                if (newPosition >= 0 && newPosition <= 63)
                 {
-                    moves.Add(new Move(CurrentPosition, newEndPosition));
+                    if (boardRepresentation[newPosition] == null)
+                        moves.Add(move);
 
-                    if (isFirstMove)
-                        moves.Add(new Move(CurrentPosition, newEndPosition + step));
+                    if(boardRepresentation[newPosition] != null && boardRepresentation[newPosition].PlayerType != PlayerType)
+                        moves.Add(move);
                 }
-
-                newEndPosition = CurrentPosition + enPassantStep1;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
-
-                newEndPosition = CurrentPosition + enPassantStep2;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
             }
 
             return moves;

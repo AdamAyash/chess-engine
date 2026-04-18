@@ -13,29 +13,23 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin ../../../../Users/aayas/Desktop/space/BlackPawn.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../../../../Users/aayas/Desktop/space/BlackPawn.png;Pieces/BlackPawn.png
+#begin Audio/check.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/check.mp3
 
-#begin ../../../../Users/aayas/Desktop/space/WhitePawn.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../../../../Users/aayas/Desktop/space/WhitePawn.png;Pieces/WhitePawn.png
+#begin Audio/gameStart.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/gameStart.mp3
+
+#begin Audio/move.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/move.mp3
 
 #begin Board/DarkSquareTexture.png
 /importer:TextureImporter
@@ -97,6 +91,18 @@
 /processorParam:TextureFormat=Color
 /build:Pieces/BlackKnight.png
 
+#begin Pieces/BlackPawn.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Pieces/BlackPawn.png
+
 #begin Pieces/BlackQueen.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -156,6 +162,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Pieces/WhiteKnight.png
+
+#begin Pieces/WhitePawn.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Pieces/WhitePawn.png
 
 #begin Pieces/WhiteQueen.png
 /importer:TextureImporter

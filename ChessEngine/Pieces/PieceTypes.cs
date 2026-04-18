@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChessEngine.Pieces
+﻿namespace ChessEngine.Pieces
 {
     internal enum PieceTypes
     {
-        Pawn = 1
+        Pawn = 1,
+        Knight = 3,
+        Bishop = 3,
+        Rook = 5,
+        Queen = 9,
+        King
     }
 }

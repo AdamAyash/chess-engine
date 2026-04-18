@@ -1,28 +1,23 @@
 ﻿using ChessEngine.Common;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace ChessEngine.Pieces
 {
-    internal class Pawn : IPiece
+    internal class Pawn : BasePiece
     {
-        public bool IsHeld { get; set; }
-        public Vector2 WindowPosition { get; set; }
-        public PlayerTypes PlayerType { get; set; }
-        public Texture2D Texture { get; set; }
-        public int CurrentPosition { get; set; }
-        public Rectangle Collider { get; set; }
-
         public Pawn(PlayerTypes playerType, Texture2D texture)
+            : base(playerType, texture)
         {
-            PlayerType = playerType;
-            this.Texture = texture;
+        }
+        public override int[] Directions()
+        {
+            return new int[] { };
         }
 
-        public PieceTypes GetPieceType() => PieceTypes.Pawn;
+        public override PieceTypes GetPieceType() => PieceTypes.Pawn;
 
-        public List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
+        public override List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
         {
             bool isFirstMove = false;
             if (PlayerType == PlayerTypes.Black && CurrentPosition > 7 && CurrentPosition < 16)
@@ -53,11 +48,11 @@ namespace ChessEngine.Pieces
 
                 newEndPosition = CurrentPosition + enPassantStep1;
                 if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
+                    moves.Add(new Move(CurrentPosition, newEndPosition));
 
                 newEndPosition = CurrentPosition + enPassantStep2;
                 if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
+                    moves.Add(new Move(CurrentPosition, newEndPosition));
             }
 
             return moves;

@@ -1,62 +1,53 @@
 ﻿using ChessEngine.Common;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Linq;
 namespace ChessEngine.Pieces
 {
-    internal class King : IPiece
+    internal class King : BasePiece
     {
-        public bool IsHeld { get; set; }
-        public Vector2 WindowPosition { get; set; }
-        public PlayerTypes PlayerType { get; set; }
-        public Texture2D Texture { get; set; }
-        public int CurrentPosition { get; set; }
-        public Rectangle Collider { get; set; }
-
         public King(PlayerTypes playerType, Texture2D texture)
+            : base(playerType , texture)
         {
-            PlayerType = playerType;
-            this.Texture = texture;
         }
 
-        public PieceTypes GetPieceType() => PieceTypes.Pawn;
+        public override PieceTypes GetPieceType() => PieceTypes.King;
+        public override int[] Directions() { return new int[] { -9, -7, 7, 9, -8, 8, -1, 1 }; }
 
-        public List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
+        public override List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
         {
-            bool isFirstMove = false;
-            if (PlayerType == PlayerTypes.Black && CurrentPosition > 7 && CurrentPosition < 16)
-                isFirstMove = true;
-            else if (PlayerType == PlayerTypes.White && CurrentPosition > 46 && CurrentPosition < 56)
-                isFirstMove = true;
+            List<IPiece> enemyPieces = boardRepresentation.Where(p => p is not null && p.PlayerType != PlayerType).ToList();
+            var enemyMoves = new List<Move>();
+
+            foreach (var piece in enemyPieces)
+            {
+                if (piece.GetPieceType() == PieceTypes.King)
+                    continue;
+
+                enemyMoves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
+            }
 
             var moves = new List<Move>();
 
-            int step = PlayerType == PlayerTypes.White ? (8 * (-1)) : 8;
+            int row = CurrentPosition / 8;
+            int col = CurrentPosition % 8;
 
-            int enPassantStep1 = PlayerType == PlayerTypes.White ? (7 * (-1)) : 7;
-            int enPassantStep2 = PlayerType == PlayerTypes.White ? (9 * (-1)) : 9;
-
-            int newEndPosition = -1;
-
-            newEndPosition = CurrentPosition + step;
-
-            if (newEndPosition > 0 && newEndPosition < 64)
+            for (int index = 0; index < Directions().Length; index++)
             {
-                if (boardRepresentation[newEndPosition] == null)
+                int newPosition = CurrentPosition + Directions()[index];
+
+                Move move = new Move(CurrentPosition, newPosition);
+                if (enemyMoves.Where(m => m.EndPosition == move.EndPosition).FirstOrDefault() != null)
+                    continue;
+
+                if (newPosition >= 0 && newPosition <= 63)
                 {
-                    moves.Add(new Move(CurrentPosition, newEndPosition));
+                    if (boardRepresentation[newPosition] == null)
+                        moves.Add(move);
 
-                    if (isFirstMove)
-                        moves.Add(new Move(CurrentPosition, newEndPosition + step));
+                    if (boardRepresentation[newPosition] != null && boardRepresentation[newPosition].PlayerType != PlayerType)
+                        moves.Add(move);
                 }
-
-                newEndPosition = CurrentPosition + enPassantStep1;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
-
-                newEndPosition = CurrentPosition + enPassantStep2;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
-                    moves.Add(new Move(CurrentPosition, newEndPosition, true));
             }
 
             return moves;

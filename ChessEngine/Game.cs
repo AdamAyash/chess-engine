@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ChessEngine.Audio;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ChessEngine
@@ -31,8 +33,8 @@ namespace ChessEngine
             _chessBoard.LightSquareTexture = Content.Load<Texture2D>("Board/LightSquareTexture");
             _chessBoard.DarkSquareTexture = Content.Load<Texture2D>("Board/DarkSquareTexture");
 
-            //_chessBoard.WhitePawnTexture = Content.Load<Texture2D>("Pieces/WhitePawn");
-            //_chessBoard.BlackPawnTexture = Content.Load<Texture2D>("Pieces/BlackPawn");
+            _chessBoard.WhitePawnTexture = Content.Load<Texture2D>("Pieces/WhitePawn");
+            _chessBoard.BlackPawnTexture = Content.Load<Texture2D>("Pieces/BlackPawn");
 
             _chessBoard.WhiteRookTexture = Content.Load<Texture2D>("Pieces/WhiteRook");
             _chessBoard.BlackRookTexture = Content.Load<Texture2D>("Pieces/BlackRook");
@@ -49,7 +51,12 @@ namespace ChessEngine
             _chessBoard.WhiteQueenTexture = Content.Load<Texture2D>("Pieces/WhiteQueen");
             _chessBoard.BlackQueenTexture = Content.Load<Texture2D>("Pieces/BlackQueen");
 
+            AudioManager.AddSoundEffect("movePiece", Content.Load<SoundEffect>("Audio/move"));
+            AudioManager.AddSoundEffect("gameStart", Content.Load<SoundEffect>("Audio/gameStart"));
+            AudioManager.AddSoundEffect("check", Content.Load<SoundEffect>("Audio/check"));
+
             _chessBoard.PopulateBoard();
+            AudioManager.PlaySoundEffect("gameStart");
         }
 
         protected override void Update(GameTime gameTime)

@@ -1,34 +1,60 @@
 ﻿using ChessEngine.Common;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace ChessEngine.Pieces
 {
-    internal class Rook : IPiece
+    internal class Rook : BasePiece
     {
-        public bool IsHeld { get; set; }
-        public Vector2 WindowPosition { get; set; }
-        public PlayerTypes PlayerType { get; set; }
-        public Texture2D Texture { get; set; }
-        public int CurrentPosition { get; set; }
-        public Rectangle Collider { get; set; }
-
         public Rook(PlayerTypes playerType, Texture2D texture)
+            : base(playerType, texture)
         {
-            PlayerType = playerType;
-            this.Texture = texture;
         }
 
-        public PieceTypes GetPieceType() => PieceTypes.Pawn;
+        public override PieceTypes GetPieceType() => PieceTypes.Rook;
 
-        public List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
+        public override int[] Directions()
+        {
+            return new int[] { -8, 8, -1, 1 };
+        }
+
+        public override List<Move> GenerateLegalMoves(IPiece[] boardRepresentation)
         {
             var moves = new List<Move>();
 
-            for(int direction = 0; direction < 8; direction++)
-            {
+            int row = CurrentPosition / 8;
+            int col = CurrentPosition % 8;
 
+            int[] maxSteps =
+            {
+                row,
+                7 - row,
+                col,
+                7 - col
+            };
+
+            for(int directionIndex = 0; directionIndex < Directions().Length; directionIndex++)
+            {
+                int direction = Directions()[directionIndex];
+                for(int stepIndex = 1;  stepIndex <= maxSteps[directionIndex]; stepIndex++)
+                {
+                    int newPosiition = CurrentPosition + (direction * stepIndex);
+                    IPiece targetPiece = boardRepresentation[newPosiition];
+
+                    if (targetPiece == null)
+                    {
+                        moves.Add(new Move(CurrentPosition, newPosiition));
+                    }
+                    else if (targetPiece.PlayerType != this.PlayerType)
+                    {
+                        moves.Add(new Move(CurrentPosition, newPosiition));
+                        break;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
 
             return moves;

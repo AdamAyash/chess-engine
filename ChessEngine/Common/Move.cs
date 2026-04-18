@@ -1,18 +1,21 @@
 ﻿namespace ChessEngine.Common
 {
-    internal struct Move
+    internal class Move
     {
         public int StartPosition { get; set; }
 
         public int EndPosition { get; set; } = -1;
 
-        public bool TakePiece { get; set; }
+        public Move()
+        {
+            StartPosition = -1;
+            EndPosition = -1;
+        }
 
-        public Move(int startPosition, int endPosition, bool takePiece = false)
+        public Move(int startPosition, int endPosition)
         {
             StartPosition = startPosition;
             EndPosition = endPosition;
-            TakePiece = takePiece;
         }
     }
 }

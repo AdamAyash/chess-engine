@@ -1,13 +1,22 @@
-﻿using ChessEngine.Common;
+﻿using ChessEngine.Audio;
+using ChessEngine.Common;
 using ChessEngine.Input;
 using ChessEngine.Pieces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ChessEngine
 {
+    enum GameStates
+    {
+        Normal,
+        InCheck,
+        Over
+    }
+
     internal class Board
     {
         private const int _boardSize = 8;
@@ -22,6 +31,10 @@ namespace ChessEngine
         private List<Move> _moves = new List<Move>();
 
         private IPiece _selectedPiece = null;
+
+        private GameStates _currentGameSate = GameStates.Normal;
+        private IPiece _endPositionPiecePrevious;
+        private IPiece _startPositionPiecePrevious;
 
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
@@ -50,7 +63,6 @@ namespace ChessEngine
             this._pieces = new();
             this._moves = new List<Move>();
         }
-
         private void ChangePlayerTurn()
         {
             if (_playerTurn == PlayerTypes.White)
@@ -64,16 +76,90 @@ namespace ChessEngine
             _selectedPiece = null;
             _moves.Clear();
         }
-
-        private void MovePiece(Move currentMove)
+        private bool MovePiece(Move currentMove)
         {
+            var previous = _boardInternalRepresentation[currentMove.EndPosition];
+
             _boardInternalRepresentation[currentMove.EndPosition] = _selectedPiece;
             _boardInternalRepresentation[currentMove.StartPosition] = null;
             _selectedPiece.CurrentPosition = currentMove.EndPosition;
+
+            AudioManager.PlaySoundEffect("movePiece");
+
+            return true;
+        }
+
+        private bool IsKingInCheck()
+        {
+            var enemyPieces = _boardInternalRepresentation.Where(p => p is not null && p.PlayerType != _playerTurn);
+            var enemyMoves = new List<Move>();
+
+            foreach (var piece in enemyPieces)
+                enemyMoves.AddRange(piece.GenerateLegalMoves(_boardInternalRepresentation));
+
+            IPiece king = _boardInternalRepresentation.Where(p => p is not null &&
+            p.PlayerType == _playerTurn && p.GetPieceType() == PieceTypes.King).FirstOrDefault();
+
+            return enemyMoves.Any(m => m.EndPosition == king.CurrentPosition);
+        }
+
+        private void SimulateMove(Move currentMove)
+        {
+            _selectedPiece = _boardInternalRepresentation[currentMove.StartPosition];
+
+            _endPositionPiecePrevious = _boardInternalRepresentation[currentMove.EndPosition];
+            _startPositionPiecePrevious = _boardInternalRepresentation[currentMove.StartPosition];
+            //var previousSelectedPiece = _selectedPiece.CurrentPosition = currentMove.EndPosition;
+
+            _boardInternalRepresentation[currentMove.EndPosition] = _selectedPiece;
+            _boardInternalRepresentation[currentMove.StartPosition] = null;
+
+            if (_selectedPiece is not null)
+                _selectedPiece.CurrentPosition = currentMove.EndPosition;
+            //_selectedPiece.CurrentPosition = currentMove.EndPosition;
+        }
+
+        private void UndoSimulatedMove(Move currentMove)
+        {
+            if (_selectedPiece is not null)
+                _selectedPiece.CurrentPosition = currentMove.StartPosition;
+
+            _boardInternalRepresentation[currentMove.EndPosition] = _endPositionPiecePrevious;
+            _boardInternalRepresentation[currentMove.StartPosition] = _selectedPiece;
+
+            _startPositionPiecePrevious = null;
+            _endPositionPiecePrevious = null;
+            _selectedPiece = null;
+        }
+
+        private bool HasAnyLegalMoves()
+        {
+            var pieces = _boardInternalRepresentation.Where(p => p is not null && p.PlayerType == _playerTurn);
+            var moves = new List<Move>();
+
+            foreach (var piece in pieces)
+                moves.AddRange(piece.GenerateLegalMoves(_boardInternalRepresentation));
+
+            foreach (var move in moves)
+            {
+                SimulateMove(move);
+                if (!IsKingInCheck())
+                {
+                    UndoSimulatedMove(move);
+                    return true;
+                }
+
+                UndoSimulatedMove(move);
+            }
+
+            return false;
         }
 
         public void Update()
         {
+            if (_currentGameSate == GameStates.Over)
+                return;
+
             InputManager.UpdateCurrentState();
 
             this._centerScreenPosition = new Vector2((WindowWidth / 2), (WindowHeight / 2));
@@ -103,10 +189,12 @@ namespace ChessEngine
                                 break;
                             }
 
-                            Move currentMove = _moves.Where(move => move.EndPosition == currentSquareIndex).FirstOrDefault();
-                            if (_selectedPiece != null && currentMove.EndPosition > 0)
+                            Move currentMove = _moves.Find(move => move.EndPosition == currentSquareIndex);
+                            if (_selectedPiece != null && currentMove != null)
                             {
-                                this.MovePiece(currentMove);
+                                if (!this.MovePiece(currentMove))
+                                    break;
+
                                 this.ChangePlayerTurn();
                                 this.Unselect();
                                 break;
@@ -117,23 +205,17 @@ namespace ChessEngine
                 }
             }
 
-            //currentSquareIndex = 0;
-            //if (InputManager.IsLeftButtonHeld())
-            //{
-            //    if (_selectedPiece is not null)
-            //    {
-            //        _selectedPiece.IsHeld = true;
-            //        _selectedPiece.WindowPosition = new Vector2(InputManager.MousePosition.X, InputManager.MousePosition.Y);
-            //    }
-            //}
-            //else
-            //{
-            //    if (_selectedPiece is not null)
-            //    {
-            //        _selectedPiece.IsHeld = false;
-            //        _selectedPiece.WindowPosition = Vector2.Zero;
-            //    }
-            //}
+            if (IsKingInCheck() && HasAnyLegalMoves())
+            {
+                if (_currentGameSate == GameStates.Normal)
+                    AudioManager.PlaySoundEffect("check");
+
+                _currentGameSate = GameStates.InCheck;
+            }
+            if (IsKingInCheck() && !HasAnyLegalMoves())
+                _currentGameSate = GameStates.Over;
+            if (!IsKingInCheck())
+                _currentGameSate = GameStates.Normal;
 
             InputManager.UpdatePreviousState();
         }
@@ -142,7 +224,7 @@ namespace ChessEngine
         {
             int boardSquareIndex = 0;
             //const string FENStarting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-            const string FENStarting = "r/6/r/8/8/8/8/8/8/R/6/R";
+            const string FENStarting = "6k1/5ppp/8/8/8/8/5PPP/4R1K1";
 
             var characters = FENStarting.ToCharArray();
             foreach (var symbol in characters)
@@ -168,9 +250,9 @@ namespace ChessEngine
                         piece = new Bishop(PlayerTypes.Black, BlackBishopTexture);
 
                     if (symbol.Equals('N'))
-                        piece = new Bishop(PlayerTypes.White, WhiteKnightTexture);
+                        piece = new Knight(PlayerTypes.White, WhiteKnightTexture);
                     else if (symbol.Equals('n'))
-                        piece = new Bishop(PlayerTypes.Black, BlackKnightTexture);
+                        piece = new Knight(PlayerTypes.Black, BlackKnightTexture);
 
                     if (symbol.Equals('Q'))
                         piece = new Queen(PlayerTypes.White, WhiteQueenTexture);
@@ -235,26 +317,20 @@ namespace ChessEngine
 
                     if (_moves.Count > 0)
                     {
-                        Move currentMove = _moves.Where(move => move.EndPosition == counter).FirstOrDefault();
-                        if (currentMove.EndPosition > 0)
-                            color = Color.LightSkyBlue;
+                        Move currentMove = _moves.Find(move => move.EndPosition == counter);
+                        if (currentMove != null)
+                        {
+                            if (_boardInternalRepresentation[currentMove.EndPosition] != null)
+                                color = Color.Red;
+                            else
+                                color = Color.LightSkyBlue;
+                        }
                     }
 
                     spriteBatch.Draw(currentSquareTexture, squareRectangle, color);
 
                     if (piece != null)
-                    {
-                        if (piece == _selectedPiece && _selectedPiece.IsHeld)
-                        {
-                            squareRectangle = new Rectangle((int)_selectedPiece.WindowPosition.X, (int)_selectedPiece.WindowPosition.Y, squareRectangle.Width, squareRectangle.Height);
-                            spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
-                        }
-                        else
-                        {
-                            spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
-
-                        }
-                    }
+                        spriteBatch.Draw(piece.Texture, squareRectangle, Color.White);
 
                     counter++;
                 }
