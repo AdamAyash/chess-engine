@@ -4,7 +4,6 @@ using ChessEngine.Input;
 using ChessEngine.Pieces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,7 +33,7 @@ namespace ChessEngine
 
         private GameStates _currentGameSate = GameStates.Normal;
         private IPiece _endPositionPiecePrevious;
-        private IPiece _startPositionPiecePrevious;
+        private IPiece _selectedPiecePrev;
 
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
@@ -105,18 +104,16 @@ namespace ChessEngine
 
         private void SimulateMove(Move currentMove)
         {
+            _selectedPiecePrev = _selectedPiece;
             _selectedPiece = _boardInternalRepresentation[currentMove.StartPosition];
 
             _endPositionPiecePrevious = _boardInternalRepresentation[currentMove.EndPosition];
-            _startPositionPiecePrevious = _boardInternalRepresentation[currentMove.StartPosition];
-            //var previousSelectedPiece = _selectedPiece.CurrentPosition = currentMove.EndPosition;
 
             _boardInternalRepresentation[currentMove.EndPosition] = _selectedPiece;
             _boardInternalRepresentation[currentMove.StartPosition] = null;
 
             if (_selectedPiece is not null)
                 _selectedPiece.CurrentPosition = currentMove.EndPosition;
-            //_selectedPiece.CurrentPosition = currentMove.EndPosition;
         }
 
         private void UndoSimulatedMove(Move currentMove)
@@ -127,9 +124,8 @@ namespace ChessEngine
             _boardInternalRepresentation[currentMove.EndPosition] = _endPositionPiecePrevious;
             _boardInternalRepresentation[currentMove.StartPosition] = _selectedPiece;
 
-            _startPositionPiecePrevious = null;
             _endPositionPiecePrevious = null;
-            _selectedPiece = null;
+            _selectedPiece = _selectedPiecePrev;
         }
 
         private bool HasAnyLegalMoves()
@@ -223,8 +219,8 @@ namespace ChessEngine
         public void PopulateBoard()
         {
             int boardSquareIndex = 0;
-            //const string FENStarting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-            const string FENStarting = "6k1/5ppp/8/8/8/8/5PPP/4R1K1";
+            const string FENStarting = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+            //const string FENStarting = "6k1/5ppp/8/8/8/8/5PPP/4R1K1";
 
             var characters = FENStarting.ToCharArray();
             foreach (var symbol in characters)
