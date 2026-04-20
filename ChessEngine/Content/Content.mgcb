@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Audio/capture.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/capture.mp3
+
 #begin Audio/check.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor

@@ -17,6 +17,7 @@
     <None Remove="Utilities\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Content\Audio\capture.mp3" />
     <None Remove="Content\Audio\gameStart.mp3" />
     <None Remove="Content\Audio\move.mp3" />
     <None Remove="Content\Pieces\BlackBishop.png" />
@@ -33,6 +34,9 @@
     <None Remove="Content\Pieces\WhiteRook.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Audio\capture.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\Audio\gameStart.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -71,6 +75,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Gum.MonoGame" Version="2026.4.5.1" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>
@@ -81,6 +86,9 @@
     <None Update="Content\Board\LightSquareTexture.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="CollectPackageReferences">
     <Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High" />

@@ -3,6 +3,7 @@
     using ChessEngine.Common;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using System;
     using System.Collections.Generic;
 
     internal abstract class BasePiece : IPiece
@@ -22,5 +23,10 @@
 
         public abstract PieceTypes GetPieceType();
         public abstract List<Move> GenerateLegalMoves(IPiece[] boardRepresentation);
+
+        object ICloneable.Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

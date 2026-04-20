@@ -1,11 +1,12 @@
 ﻿using ChessEngine.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 
 namespace ChessEngine.Pieces
 {
-    internal interface IPiece
+    internal interface IPiece : ICloneable
     {
         public Vector2 WindowPosition { get; set; }
         public PlayerTypes PlayerType { get; set; }

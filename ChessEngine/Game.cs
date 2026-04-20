@@ -1,7 +1,11 @@
 ﻿using ChessEngine.Audio;
+using ChessEngine.Common;
+using Gum.Forms;
+using Gum.Forms.Controls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGameGum;
 
 namespace ChessEngine
 {
@@ -21,8 +25,7 @@ namespace ChessEngine
         protected override void Initialize()
         {
             Window.AllowUserResizing = true;
-
-            this._chessBoard = new Board();
+            this._chessBoard = new Board(PlayerTypes.White, PlayerTypes.Black);
 
             base.Initialize();
         }
@@ -54,6 +57,7 @@ namespace ChessEngine
             AudioManager.AddSoundEffect("movePiece", Content.Load<SoundEffect>("Audio/move"));
             AudioManager.AddSoundEffect("gameStart", Content.Load<SoundEffect>("Audio/gameStart"));
             AudioManager.AddSoundEffect("check", Content.Load<SoundEffect>("Audio/check"));
+            AudioManager.AddSoundEffect("capture", Content.Load<SoundEffect>("Audio/capture"));
 
             _chessBoard.PopulateBoard();
             AudioManager.PlaySoundEffect("gameStart");

@@ -47,11 +47,11 @@ namespace ChessEngine.Pieces
                 }
 
                 newEndPosition = CurrentPosition + enPassantStep1;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
+                if (newEndPosition > 0 && newEndPosition < 63 && boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
                     moves.Add(new Move(CurrentPosition, newEndPosition));
 
                 newEndPosition = CurrentPosition + enPassantStep2;
-                if (boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
+                if (newEndPosition > 0 && newEndPosition < 63 && boardRepresentation[newEndPosition] != null && boardRepresentation[newEndPosition].PlayerType != PlayerType)
                     moves.Add(new Move(CurrentPosition, newEndPosition));
             }
 

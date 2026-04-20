@@ -1,4 +1,5 @@
-﻿using ChessEngine.Audio;
+﻿using ChessEngine.AI;
+using ChessEngine.Audio;
 using ChessEngine.Common;
 using ChessEngine.Input;
 using ChessEngine.Pieces;
@@ -26,7 +27,7 @@ namespace ChessEngine
         private Vector2 _centerScreenPosition;
 
         private List<IPiece> _pieces = new List<IPiece>();
-        private IPiece[] _boardInternalRepresentation;
+        public IPiece[] _boardInternalRepresentation;
         private List<Move> _moves = new List<Move>();
 
         private IPiece _selectedPiece = null;
@@ -34,6 +35,9 @@ namespace ChessEngine
         private GameStates _currentGameSate = GameStates.Normal;
         private IPiece _endPositionPiecePrevious;
         private IPiece _selectedPiecePrev;
+
+        private ChessAI _oponent;
+        private PlayerTypes _player;
 
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
@@ -54,9 +58,11 @@ namespace ChessEngine
         public Texture2D WhiteQueenTexture { get; set; }
         public Texture2D BlackQueenTexture { get; set; }
 
-        public Board()
+        public Board(PlayerTypes playerType, PlayerTypes oponentType)
         {
             this._playerTurn = PlayerTypes.White;
+            this._player = playerType;
+            this._oponent = new ChessAI(oponentType);
             this._centerScreenPosition = Vector2.Zero;
             this._boardInternalRepresentation = new IPiece[_boardSize * _boardSize];
             this._pieces = new();
@@ -77,20 +83,28 @@ namespace ChessEngine
         }
         private bool MovePiece(Move currentMove)
         {
+            bool isCapture = false;
+
             var previous = _boardInternalRepresentation[currentMove.EndPosition];
+
+            if (_boardInternalRepresentation[currentMove.EndPosition] != null)
+                isCapture = true;
 
             _boardInternalRepresentation[currentMove.EndPosition] = _selectedPiece;
             _boardInternalRepresentation[currentMove.StartPosition] = null;
             _selectedPiece.CurrentPosition = currentMove.EndPosition;
 
+            if(isCapture)
+                AudioManager.PlaySoundEffect("capture");
+            else
             AudioManager.PlaySoundEffect("movePiece");
 
             return true;
         }
 
-        private bool IsKingInCheck()
+        public bool IsKingInCheck(PlayerTypes playerType)
         {
-            var enemyPieces = _boardInternalRepresentation.Where(p => p is not null && p.PlayerType != _playerTurn);
+            var enemyPieces = _boardInternalRepresentation.Where(p => p is not null && p.PlayerType != playerType);
             var enemyMoves = new List<Move>();
 
             foreach (var piece in enemyPieces)
@@ -102,7 +116,7 @@ namespace ChessEngine
             return enemyMoves.Any(m => m.EndPosition == king.CurrentPosition);
         }
 
-        private void SimulateMove(Move currentMove)
+        public void SimulateMove(Move currentMove)
         {
             _selectedPiecePrev = _selectedPiece;
             _selectedPiece = _boardInternalRepresentation[currentMove.StartPosition];
@@ -128,7 +142,7 @@ namespace ChessEngine
             _selectedPiece = _selectedPiecePrev;
         }
 
-        private bool HasAnyLegalMoves()
+        public bool HasAnyLegalMoves()
         {
             var pieces = _boardInternalRepresentation.Where(p => p is not null && p.PlayerType == _playerTurn);
             var moves = new List<Move>();
@@ -139,7 +153,7 @@ namespace ChessEngine
             foreach (var move in moves)
             {
                 SimulateMove(move);
-                if (!IsKingInCheck())
+                if (!IsKingInCheck(_playerTurn))
                 {
                     UndoSimulatedMove(move);
                     return true;
@@ -156,64 +170,80 @@ namespace ChessEngine
             if (_currentGameSate == GameStates.Over)
                 return;
 
-            InputManager.UpdateCurrentState();
+            //if (_playerTurn == _player)
+            //{
+                InputManager.UpdateCurrentState();
 
-            this._centerScreenPosition = new Vector2((WindowWidth / 2), (WindowHeight / 2));
-            this._centerBoardOffset = (_squareSize * _boardSize) / 2;
+                this._centerScreenPosition = new Vector2((WindowWidth / 2), (WindowHeight / 2));
+                this._centerBoardOffset = (_squareSize * _boardSize) / 2;
 
-            if (InputManager.IsRightButtonPressed())
-                Unselect();
+                if (InputManager.IsRightButtonPressed())
+                    Unselect();
 
-            int currentSquareIndex = 0;
-            if (InputManager.IsLeftButtonPressed())
-            {
-                for (int columns = 0; columns < _boardSize; columns++)
+                int currentSquareIndex = 0;
+                if (InputManager.IsLeftButtonPressed())
                 {
-                    for (int rows = 0; rows < _boardSize; rows++)
+                    for (int columns = 0; columns < _boardSize; columns++)
                     {
-                        int xPosition = (rows * _squareSize) + ((int)_centerScreenPosition.X - _centerBoardOffset);
-                        int yPosition = columns * _squareSize + ((int)_centerScreenPosition.Y - _centerBoardOffset);
-
-                        var squareRectangle = new Rectangle(xPosition, yPosition, _squareSize, _squareSize);
-                        if (squareRectangle.Contains(InputManager.MousePosition))
+                        for (int rows = 0; rows < _boardSize; rows++)
                         {
-                            var currentPiece = _boardInternalRepresentation[currentSquareIndex];
-                            if (currentPiece is not null && currentPiece.PlayerType == _playerTurn)
-                            {
-                                _selectedPiece = currentPiece;
-                                _moves = _selectedPiece.GenerateLegalMoves(_boardInternalRepresentation);
-                                break;
-                            }
+                            int xPosition = (rows * _squareSize) + ((int)_centerScreenPosition.X - _centerBoardOffset);
+                            int yPosition = columns * _squareSize + ((int)_centerScreenPosition.Y - _centerBoardOffset);
 
-                            Move currentMove = _moves.Find(move => move.EndPosition == currentSquareIndex);
-                            if (_selectedPiece != null && currentMove != null)
+                            var squareRectangle = new Rectangle(xPosition, yPosition, _squareSize, _squareSize);
+                            if (squareRectangle.Contains(InputManager.MousePosition))
                             {
-                                if (!this.MovePiece(currentMove))
+                                var currentPiece = _boardInternalRepresentation[currentSquareIndex];
+                                if (currentPiece is not null && currentPiece.PlayerType == _playerTurn)
+                                {
+                                    _selectedPiece = currentPiece;
+                                    _moves = _selectedPiece.GenerateLegalMoves(_boardInternalRepresentation);
                                     break;
+                                }
 
-                                this.ChangePlayerTurn();
-                                this.Unselect();
-                                break;
+                                Move currentMove = _moves.Find(move => move.EndPosition == currentSquareIndex);
+                                if (_selectedPiece != null && currentMove != null)
+                                {
+                                    SimulateMove(currentMove);
+                                    if (IsKingInCheck(_playerTurn))
+                                    {
+                                        UndoSimulatedMove(currentMove);
+                                        break;
+                                    }
+
+                                    UndoSimulatedMove(currentMove);
+                                    if (!this.MovePiece(currentMove))
+                                        break;
+
+                                    this.ChangePlayerTurn();
+                                    this.Unselect();
+                                    break;
+                                }
                             }
+                            currentSquareIndex++;
                         }
-                        currentSquareIndex++;
                     }
                 }
-            }
 
-            if (IsKingInCheck() && HasAnyLegalMoves())
-            {
-                if (_currentGameSate == GameStates.Normal)
-                    AudioManager.PlaySoundEffect("check");
+                if (IsKingInCheck(_playerTurn) && HasAnyLegalMoves())
+                {
+                    if (_currentGameSate == GameStates.Normal)
+                        AudioManager.PlaySoundEffect("check");
 
-                _currentGameSate = GameStates.InCheck;
-            }
-            if (IsKingInCheck() && !HasAnyLegalMoves())
-                _currentGameSate = GameStates.Over;
-            if (!IsKingInCheck())
-                _currentGameSate = GameStates.Normal;
+                    _currentGameSate = GameStates.InCheck;
+                }
+                if (IsKingInCheck(_playerTurn) && !HasAnyLegalMoves())
+                    _currentGameSate = GameStates.Over;
+                if (!IsKingInCheck(_playerTurn))
+                    _currentGameSate = GameStates.Normal;
 
-            InputManager.UpdatePreviousState();
+                InputManager.UpdatePreviousState();
+            //}
+            //else
+            //{
+            //    _oponent.GenerateBestMove(_boardInternalRepresentation);
+            //    this.ChangePlayerTurn();
+            //}
         }
 
         public void PopulateBoard()
