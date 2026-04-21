@@ -5,10 +5,8 @@
     using Microsoft.Xna.Framework.Graphics;
     using System;
     using System.Collections.Generic;
-
     internal abstract class BasePiece : IPiece
     {
-        public Vector2 WindowPosition { get; set; }
         public PlayerTypes PlayerType { get; set; }
         public Texture2D Texture { get; set; }
         public int CurrentPosition { get; set; }
@@ -24,7 +22,7 @@
         public abstract PieceTypes GetPieceType();
         public abstract List<Move> GenerateLegalMoves(IPiece[] boardRepresentation);
 
-        object ICloneable.Clone()
+        public object Clone()
         {
             return MemberwiseClone();
         }

@@ -170,8 +170,8 @@ namespace ChessEngine
             if (_currentGameSate == GameStates.Over)
                 return;
 
-            //if (_playerTurn == _player)
-            //{
+            if (_playerTurn == _player)
+            {
                 InputManager.UpdateCurrentState();
 
                 this._centerScreenPosition = new Vector2((WindowWidth / 2), (WindowHeight / 2));
@@ -238,14 +238,34 @@ namespace ChessEngine
                     _currentGameSate = GameStates.Normal;
 
                 InputManager.UpdatePreviousState();
-            //}
-            //else
-            //{
-            //    _oponent.GenerateBestMove(_boardInternalRepresentation);
-            //    this.ChangePlayerTurn();
-            //}
-        }
+            }
+            else
+            {
+                Move move = _oponent.GenerateBestMove(_boardInternalRepresentation);
+                bool isCapture = false;
 
+                var previous = _boardInternalRepresentation[move.EndPosition];
+
+                if (_boardInternalRepresentation[move.EndPosition] != null)
+                    isCapture = true;
+
+                IPiece piece = _boardInternalRepresentation[move.StartPosition];
+
+                _boardInternalRepresentation[move.EndPosition] = piece;
+                _boardInternalRepresentation[move.StartPosition] = null;
+
+                piece.CurrentPosition = move.EndPosition;
+
+                if (isCapture)
+                    AudioManager.PlaySoundEffect("capture");
+                else
+                    AudioManager.PlaySoundEffect("movePiece");
+
+                this.ChangePlayerTurn();
+            }
+        }
+            
+       
         public void PopulateBoard()
         {
             int boardSquareIndex = 0;

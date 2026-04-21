@@ -1,5 +1,6 @@
 ﻿using ChessEngine.Audio;
 using ChessEngine.Common;
+using ChessEngine.Pieces;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using Microsoft.Xna.Framework;

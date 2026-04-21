@@ -8,7 +8,6 @@ namespace ChessEngine.Pieces
 {
     internal interface IPiece : ICloneable
     {
-        public Vector2 WindowPosition { get; set; }
         public PlayerTypes PlayerType { get; set; }
         public int CurrentPosition { get; set; }
         public Texture2D Texture { get; set; }
