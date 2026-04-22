@@ -20,7 +20,7 @@ namespace ChessEngine.AI
         private int HeuristicEval(IPiece[] board, PlayerTypes playerType)
         {
             var whiteMaterialScore = board.Where(p => p is not null && p.PlayerType == PlayerTypes.White).Sum(p => (int)p.GetPieceType());
-            var blackMaterialScore = board.Where(p => p is not null && p.PlayerType == PlayerTypes.White).Sum(p => (int)p.GetPieceType());
+            var blackMaterialScore = board.Where(p => p is not null && p.PlayerType == PlayerTypes.Black).Sum(p => (int)p.GetPieceType());
 
             if (playerType == PlayerTypes.White)
                 return whiteMaterialScore - blackMaterialScore;
@@ -53,31 +53,8 @@ namespace ChessEngine.AI
 
             return boardSnapshot;
         }
-        
-        //private bool HasAnyLegalMoves(PlayerTypes playerType, IPiece[] boardRepresentation)
-        //{
-        //    var pieces = boardRepresentation.Where(p => p is not null && p.PlayerType == playerType);
-        //    var moves = new List<Move>();
 
-        //    foreach (var piece in pieces)
-        //        moves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
-
-        //    foreach (var move in moves)
-        //    {
-        //        SimulateMove(move);
-        //        if (!IsKingInCheck(playerType, boardRepresentation))
-        //        {
-        //            UndoSimulatedMove(move);
-        //            return true;
-        //        }
-
-        //        UndoSimulatedMove(move);
-        //    }
-
-        //    return false;
-        //}
-
-        private  void SimulateMove(Move move, IPiece[] boardRepresentation)
+        private void SimulateMove(Move move, IPiece[] boardRepresentation)
         {
             IPiece piece = boardRepresentation[move.StartPosition];
             boardRepresentation[move.EndPosition] = piece;
@@ -85,37 +62,51 @@ namespace ChessEngine.AI
             piece.CurrentPosition = move.EndPosition;
         }
 
-        private int MiniMax(Move move, int depth, IPiece[] boardRepresentation, bool isMaximizer, PlayerTypes playerType)
+        private int MiniMax(int depth, IPiece[] boardRepresentation, bool isMaximizer, PlayerTypes playerType)
         {
-            if (depth == 0 /*|| (IsKingInCheck(playerType, boardRepresentation) && !HasAnyLegalMoves(playerType, boardRepresentation))*/)
-                return HeuristicEval(boardRepresentation, playerType);
-
-            var pieces = boardRepresentation.Where(p => p is not null && p.PlayerType == playerType);
-            var moves = new List<Move>();
-
-            foreach (var piece in pieces)
-                moves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
+            if (depth == 0 || IsKingInCheck(playerType, boardRepresentation))
+                return HeuristicEval(boardRepresentation, OponentType);
 
             PlayerTypes nextPlayer = playerType == PlayerTypes.White ? PlayerTypes.Black : PlayerTypes.White;
 
             if (isMaximizer)
             {
                 int maxEvaluation = int.MinValue;
-                var boardSapshot = MakeSnapshot(boardRepresentation);
-                _boardSnapshot.Push(boardSapshot);
-                SimulateMove(move, boardSapshot);
-                maxEvaluation = Math.Max(maxEvaluation, MiniMax(move, depth - 1, boardSapshot, false, nextPlayer));
-                boardRepresentation = _boardSnapshot.Pop();
+
+                var pieces = boardRepresentation.Where(p => p is not null && p.PlayerType == nextPlayer);
+                var moves = new List<Move>();
+
+                foreach (var piece in pieces)
+                    moves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
+
+                foreach (var currentMove in moves)
+                {
+                    var boardSapshot = MakeSnapshot(boardRepresentation);
+                    _boardSnapshot.Push(boardSapshot);
+                    SimulateMove(currentMove, boardRepresentation);
+                    maxEvaluation = Math.Max(maxEvaluation, MiniMax(depth - 1, boardRepresentation, false, nextPlayer));
+                    boardRepresentation = _boardSnapshot.Pop();
+                }
+
                 return maxEvaluation;
             }
             else
             {
                 int minEvaluation = int.MaxValue;
-                var boardSapshot = MakeSnapshot(boardRepresentation);
-                _boardSnapshot.Push(boardSapshot);
-                SimulateMove(move, boardSapshot);
-                minEvaluation = Math.Min(minEvaluation, MiniMax(move, depth - 1, boardSapshot, true, nextPlayer));
-                boardRepresentation = _boardSnapshot.Pop();
+                var pieces = boardRepresentation.Where(p => p is not null && p.PlayerType == nextPlayer);
+                var moves = new List<Move>();
+
+                foreach (var piece in pieces)
+                    moves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
+
+                foreach (var currentMove in moves)
+                {
+                    var boardSapshot = MakeSnapshot(boardRepresentation);
+                    _boardSnapshot.Push(boardSapshot);
+                    SimulateMove(currentMove, boardRepresentation);
+                    minEvaluation = Math.Min(minEvaluation, MiniMax(depth - 1, boardRepresentation, true, nextPlayer));
+                    boardRepresentation = _boardSnapshot.Pop();
+                }
                 return minEvaluation;
             }
         }
@@ -133,12 +124,17 @@ namespace ChessEngine.AI
 
             foreach (var move in moves)
             {
-                int currentEvaluation = MiniMax(move,  3, boardRepresentation, true, OponentType);
+                var boardSapshot = MakeSnapshot(boardRepresentation);
+                _boardSnapshot.Push(boardSapshot);
+
+                int currentEvaluation = MiniMax(3, boardRepresentation, true, OponentType);
                 if (currentEvaluation > bestEvaluation)
                 {
                     bestEvaluation = currentEvaluation;
                     bestMove = move;
                 }
+
+                boardRepresentation = _boardSnapshot.Pop();
             }
 
             return bestMove;
