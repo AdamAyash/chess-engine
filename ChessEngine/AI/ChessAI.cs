@@ -62,9 +62,31 @@ namespace ChessEngine.AI
             piece.CurrentPosition = move.EndPosition;
         }
 
-        private int MiniMax(int depth, IPiece[] boardRepresentation, bool isMaximizer, PlayerTypes playerType)
+        private bool HasAnyLegalMoves(PlayerTypes playerType, IPiece[] boardRepresentation)
         {
-            if (depth == 0 || IsKingInCheck(playerType, boardRepresentation))
+            var pieces = boardRepresentation.Where(p => p is not null && p.PlayerType == playerType);
+            var moves = new List<Move>();
+
+            foreach (var piece in pieces)
+                moves.AddRange(piece.GenerateLegalMoves(boardRepresentation));
+
+            foreach (var move in moves)
+            {
+                var boardSapshot = MakeSnapshot(boardRepresentation);
+                _boardSnapshot.Push(boardSapshot);
+                SimulateMove(move, boardSapshot);
+                if (!IsKingInCheck(playerType, boardSapshot))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private int MiniMax(int depth, IPiece[] boardRepresentation, int alpha, int beta, bool isMaximizer, PlayerTypes playerType)
+        {
+            if (depth == 0 || IsKingInCheck(playerType, boardRepresentation) && !HasAnyLegalMoves(playerType, boardRepresentation))
                 return HeuristicEval(boardRepresentation, OponentType);
 
             PlayerTypes nextPlayer = playerType == PlayerTypes.White ? PlayerTypes.Black : PlayerTypes.White;
@@ -83,9 +105,11 @@ namespace ChessEngine.AI
                 {
                     var boardSapshot = MakeSnapshot(boardRepresentation);
                     _boardSnapshot.Push(boardSapshot);
-                    SimulateMove(currentMove, boardRepresentation);
-                    maxEvaluation = Math.Max(maxEvaluation, MiniMax(depth - 1, boardRepresentation, false, nextPlayer));
-                    boardRepresentation = _boardSnapshot.Pop();
+                    SimulateMove(currentMove, boardSapshot);
+                    maxEvaluation = Math.Max(maxEvaluation, MiniMax(depth - 1, boardRepresentation, alpha, beta, false, nextPlayer));
+                    alpha = Math.Max(alpha, maxEvaluation);
+                    if (beta <= alpha)
+                        break;
                 }
 
                 return maxEvaluation;
@@ -103,9 +127,11 @@ namespace ChessEngine.AI
                 {
                     var boardSapshot = MakeSnapshot(boardRepresentation);
                     _boardSnapshot.Push(boardSapshot);
-                    SimulateMove(currentMove, boardRepresentation);
-                    minEvaluation = Math.Min(minEvaluation, MiniMax(depth - 1, boardRepresentation, true, nextPlayer));
-                    boardRepresentation = _boardSnapshot.Pop();
+                    SimulateMove(currentMove, boardSapshot);
+                    minEvaluation = Math.Min(minEvaluation, MiniMax(depth - 1, boardRepresentation, alpha, beta, true, nextPlayer));
+                    beta = Math.Min(beta, minEvaluation);
+                    if (beta <= alpha)
+                        break;
                 }
                 return minEvaluation;
             }
@@ -126,15 +152,13 @@ namespace ChessEngine.AI
             {
                 var boardSapshot = MakeSnapshot(boardRepresentation);
                 _boardSnapshot.Push(boardSapshot);
-
-                int currentEvaluation = MiniMax(3, boardRepresentation, true, OponentType);
+                SimulateMove(move, boardSapshot);
+                int currentEvaluation = MiniMax(4, boardSapshot, int.MinValue, int.MaxValue, false, OponentType);
                 if (currentEvaluation > bestEvaluation)
                 {
                     bestEvaluation = currentEvaluation;
                     bestMove = move;
                 }
-
-                boardRepresentation = _boardSnapshot.Pop();
             }
 
             return bestMove;

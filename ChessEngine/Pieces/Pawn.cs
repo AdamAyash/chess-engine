@@ -42,7 +42,7 @@ namespace ChessEngine.Pieces
                 {
                     moves.Add(new Move(CurrentPosition, newEndPosition));
 
-                    if (isFirstMove)
+                    if (isFirstMove && boardRepresentation[newEndPosition + step] == null)
                         moves.Add(new Move(CurrentPosition, newEndPosition + step));
                 }
 
